@@ -18,7 +18,7 @@ public class SearchThread extends Thread{
     private String host;
     private int numOcur;
     private ArrayList<Integer> blackListOcur;
-    private HostBlacklistsDataSourceFacade skds;
+    private HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
     private int blackListChecked;
 
     public SearchThread(int from, int to, String host) {
@@ -28,16 +28,15 @@ public class SearchThread extends Thread{
         numOcur = 0;
         blackListOcur = new ArrayList<>();
         blackListChecked = 0;
-        HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
     }
 
     @Override
     public void run() {
         for (int i=from; i<to; i++){
+            blackListChecked++;
             if (skds.isInBlackListServer(i, host)){
                 numOcur++;
                 blackListOcur.add(i);
-                blackListChecked++;
             }
         }
     }

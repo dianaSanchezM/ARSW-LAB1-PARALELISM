@@ -47,13 +47,13 @@ public class HostBlackListsValidator {
             }
         }
         
-        for (SearchThread k:threadList){
-            k.start();
+        for (SearchThread l:threadList){
+            l.start();
         }
         
-        for (SearchThread k:threadList){
+        for (SearchThread j:threadList){
             try {
-                k.join();
+                j.join();
             } catch (InterruptedException ex) {
                 Logger.getLogger(HostBlackListsValidator.class.getName()).log(Level.SEVERE, null, ex);
             }
