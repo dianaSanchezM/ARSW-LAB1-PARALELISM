@@ -6,6 +6,7 @@
 package edu.eci.arsw.blacklistvalidator;
 
 import edu.eci.arsw.spamkeywordsdatasource.HostBlacklistsDataSourceFacade;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,25 +30,39 @@ public class HostBlackListsValidator {
      * @param ipaddress suspicious host's IP address.
      * @return  Blacklists numbers where the given host's IP address was found.
      */
-    public List<Integer> checkHost(String ipaddress){
+    public List<Integer> checkHost(String ipaddress, int N){
         
         LinkedList<Integer> blackListOcurrences=new LinkedList<>();
-        
         int ocurrencesCount=0;
-        
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
-        
         int checkedListsCount=0;
+        int numServers= skds.getRegisteredServersCount()/N;
+        ArrayList<SearchThread> threadList= new ArrayList<>();
         
-        for (int i=0;i<skds.getRegisteredServersCount() && ocurrencesCount<BLACK_LIST_ALARM_COUNT;i++){
-            checkedListsCount++;
-            
-            if (skds.isInBlackListServer(i, ipaddress)){
-                
-                blackListOcurrences.add(i);
-                
-                ocurrencesCount++;
+        for (int j=0; j<N; j++){
+            if (j==N-1){
+                threadList.add(new SearchThread(j*numServers, skds.getRegisteredServersCount(), ipaddress));
+            }else{
+                threadList.add(new SearchThread(j*numServers, (j+1)*numServers, ipaddress));
             }
+        }
+        
+        for (SearchThread k:threadList){
+            k.start();
+        }
+        
+        for (SearchThread k:threadList){
+            try {
+                k.join();
+            } catch (InterruptedException ex) {
+                Logger.getLogger(HostBlackListsValidator.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        for (SearchThread i:threadList){
+            ocurrencesCount+=i.getNumOcur();
+            blackListOcurrences.addAll(i.getBlackListOcur());
+            checkedListsCount+=i.getBlackListChecked();
         }
         
         if (ocurrencesCount>=BLACK_LIST_ALARM_COUNT){

@@ -12,20 +12,22 @@ import java.util.ArrayList;
  *
  * @author 2108310
  */
-public class searchThread extends Thread{
+public class SearchThread extends Thread{
     private int from;
     private int to;
     private String host;
     private int numOcur;
     private ArrayList<Integer> blackListOcur;
     private HostBlacklistsDataSourceFacade skds;
+    private int blackListChecked;
 
-    public searchThread(int from, int to, String host) {
+    public SearchThread(int from, int to, String host) {
         this.from = from;
         this.to = to;
         this.host = host;
         numOcur = 0;
         blackListOcur = new ArrayList<>();
+        blackListChecked = 0;
         HostBlacklistsDataSourceFacade skds=HostBlacklistsDataSourceFacade.getInstance();
     }
 
@@ -35,6 +37,7 @@ public class searchThread extends Thread{
             if (skds.isInBlackListServer(i, host)){
                 numOcur++;
                 blackListOcur.add(i);
+                blackListChecked++;
             }
         }
     }
@@ -42,9 +45,17 @@ public class searchThread extends Thread{
     public int getNumOcur() {
         return numOcur;
     }
-    
-    
-    
-    
+
+    public ArrayList<Integer> getBlackListOcur() {
+        return blackListOcur;
+    }
+
+    public void setBlackListOcur(ArrayList<Integer> blackListOcur) {
+        this.blackListOcur = blackListOcur;
+    }
+
+    public int getBlackListChecked() {
+        return blackListChecked;
+    }
     
 }
